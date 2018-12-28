@@ -1,0 +1,71 @@
+<!--  ssm框架需要哪些jar包：
+		spring的核心jar
+		srping-core
+		spring-beans
+		spring-context
+		spring-context-support
+		
+		springmvc的jar：
+		spring-web
+		spring-webmvc
+		
+		spring的aop的jar包：
+		spring-aop
+		aspectjrt
+		aspectjweaver
+		spring-tx 事务管理
+		
+		spring-orm的jar
+		spring-jdbc
+		spring-orm
+		
+		srping-oxm目的是在 Java 对象（几乎总是一个 plain old Java object，或简写为 POJO）和 XML 文档之间来回转换
+		
+		spring-jms
+		spring-test
+		
+		
+		mybatis的jar:
+		mybatis
+		mybatis-spring
+		mybatis-paginator：分页jar，还有其他的jar
+		
+		
+		数据库的jar包：
+		mysql-connector-java
+		commons-dbcp
+		
+		redis的jar包：
+		jedis
+		spring-data-redis
+		
+		
+		标签库：
+		jstl
+		standard
+		
+		日志：
+		log4j
+		slf4j-api
+		slf4j-log4j12
+		fastjson  格式化对象，方便日志输出,比如json
+		
+		jackson:
+		jackson-databind
+		jackson-core
+		
+		
+		ssm上传：
+		commons-fileupload
+		commons-io
+		
+		字符串编码：
+		commons-codec
+		
+		gson
+		
+		ant
+		
+		commons-lang
+		
+	 -->
