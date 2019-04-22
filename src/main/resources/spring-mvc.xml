@@ -6,11 +6,31 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd ">
 	
-	<!-- 扫描controller包 -->
-	<context:component-scan base-package="com.test.controller">
+	<!-- 扫描controller包，spring-mvc.xml文件只管理控制层的跳转，不管理其他的，
+	 use-default-filters="false"不使用默认的filter进行扫描，制定扫描注解-->
+	<context:component-scan base-package="com.test.controller" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
 	<!-- 启动注解 -->
 	<mvc:annotation-driven/>
+	<mvc:default-servlet-handler/>
+
+
+	<!-- 文件上传限制大小 -->
+	<bean id="multipartResolver"
+		  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- set the max upload size 10MB -->
+		<property name="maxUploadSize">
+			<value>10485760</value>
+		</property>
+		<property name="maxInMemorySize">
+			<value>4096</value>
+		</property>
+	</bean>
 	<!-- 视图解析器 -->
-	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"></bean>
+	<bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB_INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
 	
 </beans>
