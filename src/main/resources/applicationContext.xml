@@ -1,15 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd"
-		default-lazy-init="true" >
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd"
+       default-lazy-init="true">
+    <!--扫描service和dao层-->
+    <context:component-scan base-package="com.test" use-default-filters="false">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
 
-	
+    <!--加载配置文件-->
+    <bean id="placeholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/project.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${driverClassName}"/>
+        <property name="url" value="${jdbcUrl}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${initialSize}"/>
+        <property name="minIdle" value="${minIdle}"/>
+        <property name="maxActive" value="${maxActive}"/>
+        <!-- 最大等待时间，单位时毫秒 -->
+        <property name="maxWait" value="${maxWait}"/>
+
+        <!-- timeBetweenEvictionRunsMillis和minEvictableIdleTimeMillis搭配使用 -->
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <!-- 理论上这中配置不应该出现在实际的生产环境，因为有时应用程序执行长事务 -->
+        <!-- removeAbandoned和removeAbandonedTimeout搭配使用 -->
+        <!-- 是否清理removeAbandonedTimeout秒没有使用的活动连接,清理后并没有放回连接池  -->
+        <!--<property name="removeAbandoned" value="true"/>-->
+        <!-- 活动连接的最大空闲时间，单位秒 -->
+        <!--<property name="removeAbandonedTimeout" value="60"/>-->
+        <!-- 连接池收回空闲的活动连接时是否打印消息 -->
+        <!--<property name="logAbandoned" value="true"/>-->
+        <!-- minEvictableIdleTimeMillis,removeAbandonedTimeout这两个参数针对的连接对象不一样,
+             minEvictableIdleTimeMillis针对连接池中的连接对象,
+             removeAbandonedTimeout针对未被close的活动连接.  -->
+
+        <!--用来检测连接是否有效的sql，要求是一个查询语句。如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会其作用。
+            在mysql中通常为select 'x'，在oracle中通常为select 1 from dual-->
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <!--可以保证连接池内部定时检测连接的可用性，不可用的连接会被抛弃或者重建，最大情况的保证从连接池中得到的Connection对象是可用的，建议配置未true-->
+        <property name="testWhileIdle" value="true"/>
+        <!--申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。-->
+        <property name="testOnBorrow" value="false"/>
+        <!--归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。-->
+        <property name="testOnReturn" value="false"/>
+        <!--属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有：监控统计用的filter:stat日志用的filter:log4j防御sql注入的filter:wall-->
+        <property name="filters" value="stat"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="query*" propagation="SUPPORTS"/>
+            <tx:method name="find*" propagation="SUPPORTS"/>
+            <tx:method name="get*" propagation="SUPPORTS"/>
+            <tx:method name="load*" propagation="SUPPORTS"/>
+            <tx:method name="list*" propagation="SUPPORTS"/>
+            <tx:method name="check*" propagation="SUPPORTS"/>
+            <tx:method name="qry*" propagation="SUPPORTS"/>
+            <tx:method name="select*" propagation="SUPPORTS"/>
+
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="del*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="upd*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="creat*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="edit*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="gain*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="onlineDb*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="trxqry*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="credit*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="debit*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="hessian*" propagation="REQUIRES_NEW" rollback-for="Exception"/>
+            <tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="txPoincut" expression="execution(* com.test.service.impl..*.*(..)) "/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPoincut"/>
+    </aop:config>
+
 </beans>
