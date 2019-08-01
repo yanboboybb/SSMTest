@@ -3,16 +3,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd"
-       default-lazy-init="true">
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		                   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd"
+       >
     <!--扫描service和dao层-->
-    <context:component-scan base-package="com.test" use-default-filters="false">
+    <context:component-scan base-package="com.test">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
-        <context:exclude-filter type="annotation"
-                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
     </context:component-scan>
 
     <!--加载配置文件-->
@@ -24,6 +23,7 @@
         </property>
     </bean>
 
+    <!--1、配置数据源-->
     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
         <property name="driverClassName" value="${driverClassName}"/>
         <property name="url" value="${jdbcUrl}"/>
@@ -67,10 +67,47 @@
         <property name="filters" value="stat"/>
     </bean>
 
+    <!-- 配置druid监控spring jdbc -->
+    <!--<bean id="druid-stat-interceptor"
+          class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
+    </bean>
+    <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut"
+          scope="prototype">
+        <property name="patterns">
+            <list>
+                <value>com.test.service.*</value>
+            </list>
+        </property>
+    </bean>
+    <aop:config>
+        <aop:advisor advice-ref="druid-stat-interceptor"
+                     pointcut-ref="druid-stat-pointcut"/>
+    </aop:config>-->
+
+    <!-- 2. mybatis的SqlSession的工厂: SqlSessionFactoryBean dataSource:引用数据源 MyBatis定义数据源,同意加载配置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:SqlMapConfig.xml"/>
+        <!-- 通配符指定Mapper.xml -->
+        <property name="mapperLocations" value="classpath:/mybatis/**/*Mapper.xml"/>
+        <!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
+        <property name="typeAliasesPackage" value="com.test.entity"/>
+    </bean>
+
+    <!-- 3. mybatis自动扫描加载Sql映射文件/接口 : MapperScannerConfigurer sqlSessionFactory
+        basePackage:指定sql映射文件/接口所在的包（自动扫描） -->
+    <!--说明：如果xxMapper.xml配置文件放在和xxMapper.java统一目录下，mappers也可以省略，
+    因为org.mybatis.spring.mapper.MapperFactoryBean默认会去查找与xxMapper.java相同目录和名称的xxMapper.xml -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.test.mapper"/>
+    </bean>
+
+    <!--4. 事务管理-->
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource"></property>
     </bean>
 
+    <!-- 5. 使用声明式事务 transaction-manager：引用上面定义的事务管理器 -->
     <tx:advice id="txAdvice" transaction-manager="transactionManager">
         <tx:attributes>
             <tx:method name="query*" propagation="SUPPORTS"/>
@@ -101,8 +138,17 @@
     </tx:advice>
 
     <aop:config>
-        <aop:pointcut id="txPoincut" expression="execution(* com.test.service.impl..*.*(..)) "/>
+        <aop:pointcut id="txPoincut" expression="execution(* com.test.service..*.*(..)) "/>
         <aop:advisor advice-ref="txAdvice" pointcut-ref="txPoincut"/>
     </aop:config>
+
+    <!--配置 i18n-->
+    <bean id="messageSource"
+          class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename">
+            <!-- 定义消息资源文件的相对路径 -->
+            <value>i18n/message</value>
+        </property>
+    </bean>
 
 </beans>

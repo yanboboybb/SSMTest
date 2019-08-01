@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.test.mapper.TestSSMMapper">
+
+    <resultMap id="testSSMResult" type="com.test.entity.TestSSM">
+        <id column="id" property="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <sql id="testSSMColumns">
+        id,
+        `name`
+    </sql>
+
+    <sql id="testSSMProperties">
+        #{id},
+        #{name}
+    </sql>
+
+    <insert id="insertTestSSM" parameterType="TestSSM" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+        INSERT INTO test_ssm (
+        <include refid="testSSMColumns"/>
+        ) VALUES (
+        <include refid="testSSMProperties"/>
+        )
+    </insert>
+
+    <select id="queryTestSSMListPage" parameterType="TestSSM" resultMap="testSSMResult">
+        SELECT <include refid="testSSMColumns"/> FROM test_ssm
+    </select>
+
+</mapper>
