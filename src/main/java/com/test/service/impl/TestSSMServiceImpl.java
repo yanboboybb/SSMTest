@@ -21,9 +21,7 @@ public class TestSSMServiceImpl implements TestSSMService {
     private TestSSMMapper testSSMMapper;
 
     public int insertTestSSM(TestSSM testSSM) throws Exception {
-        int rows = testSSMMapper.insertTestSSM(testSSM);
-        int a = 1 / 0;
-        return rows;
+        return testSSMMapper.insertTestSSM(testSSM);
     }
 
     public List<TestSSM> queryTestSSMListPage(TestSSM testSSM) throws Exception {
