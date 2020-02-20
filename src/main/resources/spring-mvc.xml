@@ -13,9 +13,14 @@
 	</context:component-scan>
 	<!-- 启动注解 -->
 	<mvc:annotation-driven/>
+	<!-- 解决静态资源被拦截的问题 -->
 	<mvc:default-servlet-handler/>
 
-
+	<!-- 视图解析器 -->
+	<bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
 	<!-- 文件上传限制大小 -->
 	<bean id="multipartResolver"
 		  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
@@ -27,10 +32,44 @@
 			<value>4096</value>
 		</property>
 	</bean>
-	<!-- 视图解析器 -->
-	<bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB_INF/"/>
-		<property name="suffix" value=".jsp"/>
+	<!-- 配置内容协商视图解析；REST中根据URL后缀自动判定Content-Type及相应的View；json/xml视图 -->
+	<bean id="contentNegotiationManager"
+		  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="mediaTypes">
+			<value>
+				json=application/json
+				xml=application/xml
+			</value>
+		</property>
 	</bean>
-	
+
+	<!-- Spring MVC 内置处理json配置 添加jackson-mapper-asl-1.*.*.jar jackson-core-asl-1.*.*.jar这两个包实现 -->
+	<bean
+			class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="stringHttpMessageConverter"/>
+				<!-- json消息转换器 -->
+				<bean
+						class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/plain;charset=UTF-8</value>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!-- 字符串请求响应消息转换器 -->
+	<bean id="stringHttpMessageConverter"
+		  class="org.springframework.http.converter.StringHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
 </beans>

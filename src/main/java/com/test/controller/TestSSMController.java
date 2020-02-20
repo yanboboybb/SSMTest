@@ -13,12 +13,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @Description:
@@ -31,6 +32,29 @@ import java.util.Map;
 public class TestSSMController extends SupperController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestSSMController.class);
+
+
+    @RequestMapping("/index")
+    public String index(HttpServletRequest request, HttpServletResponse response) {
+        UUID uuid = UUID.randomUUID();
+        Cookie cookie = new Cookie("sid", uuid.toString().replaceAll("-", ""));
+        cookie.setMaxAge(1 * 24 * 60 * 60);
+        cookie.setPath("/");
+        cookie.setDomain("ybb.com");
+        response.addCookie(cookie);
+
+        Cookie cookie1 = new Cookie("sid", uuid.toString().replaceAll("-", ""));
+        cookie1.setMaxAge(1 * 24 * 60 * 60);
+        cookie1.setPath("/");
+        cookie1.setDomain("ybb.com");
+        response.addCookie(cookie);
+        return "views/welcome";
+    }
+    @RequestMapping("//left")
+    public String left(HttpServletRequest request, HttpServletResponse response) {
+        return "views/left";
+    }
+
 
     @Autowired
     private TestSSMService testSSMService;
