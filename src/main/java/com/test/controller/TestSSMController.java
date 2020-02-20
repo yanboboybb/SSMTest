@@ -50,7 +50,7 @@ public class TestSSMController extends SupperController {
         response.addCookie(cookie);
         return "views/welcome";
     }
-    @RequestMapping("//left")
+    @RequestMapping("/left")
     public String left(HttpServletRequest request, HttpServletResponse response) {
         return "views/left";
     }
