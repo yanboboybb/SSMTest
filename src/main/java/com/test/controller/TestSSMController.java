@@ -6,20 +6,23 @@ import com.github.pagehelper.PageInfo;
 import com.test.common.utils.StringUtils;
 import com.test.entity.TestSSM;
 import com.test.service.TestSSMService;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
 
 /**
  * @Description:
@@ -35,7 +38,7 @@ public class TestSSMController extends SupperController {
 
 
     @RequestMapping("/index")
-    public String index(HttpServletRequest request, HttpServletResponse response) {
+    public ModelAndView index(HttpServletRequest request, HttpServletResponse response) {
         UUID uuid = UUID.randomUUID();
         Cookie cookie = new Cookie("sid", uuid.toString().replaceAll("-", ""));
         cookie.setMaxAge(1 * 24 * 60 * 60);
@@ -48,8 +51,11 @@ public class TestSSMController extends SupperController {
         cookie1.setPath("/");
         cookie1.setDomain("ybb.com");
         response.addCookie(cookie);
-        return "views/welcome";
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("views/welcome");
+        return modelAndView;
     }
+
     @RequestMapping("/left")
     public String left(HttpServletRequest request, HttpServletResponse response) {
         return "views/left";
@@ -102,6 +108,43 @@ public class TestSSMController extends SupperController {
             LOGGER.error("TestSSMController.selectListPage--error", e);
         }
         return json;
+    }
+
+
+    @RequestMapping("/velocity/hello")
+    public void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+
+        //配置velocity模板目录
+        Properties properties = new Properties();
+        properties.setProperty("resource.loader", "webapp");
+        properties.setProperty("webapp.resource.loader.class", "org.apache.velocity.tools.view.servlet.WebappLoader");
+        properties.setProperty("webapp.resource.loader.path", "/WEB-INF/template");
+        properties.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
+        properties.setProperty(Velocity.INPUT_ENCODING, "UTF-8");
+        properties.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
+        VelocityEngine velocityEngine = new VelocityEngine(properties);
+        velocityEngine.setApplicationAttribute("javax.servlet.ServletContext", request.getServletContext());
+
+        //配置velocity模板内容
+        VelocityContext context = new VelocityContext();
+        context.put("name", "user01");
+
+        List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+        for (int i = 0; i < 10; i++) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("name", "Tom" + i);
+            map.put("age", i);
+            map.put("sex", i % 2);
+            mapList.add(map);
+        }
+        context.put("mapList", mapList);
+        StringWriter sw = new StringWriter();
+        velocityEngine.mergeTemplate("hello.vm", "utf-8", context, sw);
+        out.println(sw.toString());
+
     }
 
 }

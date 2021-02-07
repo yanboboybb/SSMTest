@@ -1,5 +1,3 @@
-import com.test.entity.TestSSM;
-import com.test.service.TestSSMService;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -16,7 +14,7 @@ public class TestT {
     public void test1() {
 
         ApplicationContext alc = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-        TestSSMService testSSMService = (TestSSMService) alc.getBean("testSSMService");
+        /*TestSSMService testSSMService = (TestSSMService) alc.getBean("testSSMService");
         System.out.println(testSSMService);
         TestSSM testSSM = new TestSSM();
         testSSM.setName("sss");
@@ -25,7 +23,9 @@ public class TestT {
             System.out.println(rows);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+
+        System.out.println();
 
     }
 

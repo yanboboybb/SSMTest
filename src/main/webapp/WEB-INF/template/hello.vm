@@ -1,0 +1,20 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+    #set( $this = "Velocity1")
+    $this is great! <br/>
+    $name <br/>
+hi , i am letian
+<br>
+    #foreach($a in $!{mapList})
+        <br>
+        <br>
+        name:$!{a.name} <br>
+        age:$!{a.age}<br>
+        age:$!{a.sex}<br>
+    #end
+<h1>你好</h1>
+</body>
+</html>
