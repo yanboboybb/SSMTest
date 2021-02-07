@@ -263,7 +263,7 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.7.0</version>
+            <version>1.10.9</version>
         </dependency>
 
         <!-- gson google解析Json的一个开源框架,同类的框架fastJson,JackJson等 -->
