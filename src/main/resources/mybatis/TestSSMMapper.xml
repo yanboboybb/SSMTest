@@ -17,7 +17,7 @@
         #{name}
     </sql>
 
-    <insert id="insertTestSSM" parameterType="TestSSM" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
+    <insert id="insertTestSSM" parameterType="com.test.entity.TestSSM" keyProperty="id" keyColumn="id" useGeneratedKeys="true">
         INSERT INTO test_ssm (
         <include refid="testSSMColumns"/>
         ) VALUES (
@@ -25,7 +25,7 @@
         )
     </insert>
 
-    <select id="queryTestSSMListPage" parameterType="TestSSM" resultMap="testSSMResult">
+    <select id="queryTestSSMListPage" parameterType="com.test.entity.TestSSM" resultMap="testSSMResult">
         SELECT <include refid="testSSMColumns"/> FROM test_ssm
     </select>
 
