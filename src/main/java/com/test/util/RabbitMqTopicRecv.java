@@ -12,12 +12,15 @@ import java.util.Base64;
  * @DATE: 2021/2/7 19:50
  * @description:
  */
-public class RabbitMqRecv {
+public class RabbitMqTopicRecv {
 
-    private final static String QUEUE_NAME = "oa_notice";
+    //private final static String QUEUE_NAME = "wz_oa_notice";
+    private final static String QUEUE_NAME = "hanweb-queue-oa-info";
+    private final static String EXCHANGE_NAME = "com.hanweb.cms.oa";
+    private final static String ROUTING_KEY = "hanweb-route-oa-feedback";
     private final static String HOST = "127.0.0.1";
-    private final static String username = "test";
-    private final static String password = "test123";
+    private final static String username = "admin";
+    private final static String password = "hanweb";
     private final static Integer PORT = 5672;
 
     private final static String CHAR_SET = "UTF-8";
@@ -32,10 +35,12 @@ public class RabbitMqRecv {
             factory.setPort(PORT);
             factory.setUsername(username);
             factory.setPassword(password);
-            factory = new ConnectionFactory();
             connection = factory.newConnection();
             channel = connection.createChannel();
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            channel.queueDeclare(QUEUE_NAME, true, false, false, null);
+            channel.exchangeDeclare(EXCHANGE_NAME, "topic",true);
+            //绑定队列名。交换器和路由键
+            channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);//路由键用通配符匹配
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -55,6 +60,6 @@ public class RabbitMqRecv {
     }
 
     public static void main(String[] args) {
-        getMessage(false);
+        getMessage(true);
     }
 }
